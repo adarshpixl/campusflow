@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Flow - Student</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body class="student-page">
+    <div class="topbar">
+        <div class="container header">
+            <div class="brand">
+                <div class="brand-icon">C</div>
+                <div>
+                    <h1>Campus Flow</h1>
+                    <p>Student Dashboard</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="secondary-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="student-layout container">
+        <div class="card">
+            <div class="header">
+                <div>
+                    <h2>Welcome back</h2>
+                    <p class="small-label">Logged in as <strong id="userEmail">student@domain.com</strong></p>
+                </div>
+                <span class="badge">Student view</span>
+            </div>
+        </div>
+
+        <section class="card-grid-3">
+            <div class="summary-card">
+                <h4>Attendance rate</h4>
+                <p id="attendanceRate">--%</p>
+            </div>
+            <div class="summary-card">
+                <h4>Subjects tracked</h4>
+                <p id="subjectCount">--</p>
+            </div>
+            <div class="summary-card">
+                <h4>Announcements</h4>
+                <p id="announcementCount">--</p>
+            </div>
+            <div class="summary-card">
+                <h4>Assignments</h4>
+                <p id="assignmentsCount">--</p>
+            </div>
+        </section>
+
+        <div class="card-grid-2">
+            <section class="card table-card">
+                <div class="section-title">
+                    <h2>Attendance</h2>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Total Present</th>
+                            <th>Total Absent</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceTable">
+                        <tr><td colspan="3" style="padding: 18px; color: var(--muted);">Loading attendance...</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="card table-card">
+                <div class="section-title">
+                    <h2>Internals</h2>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Marks</th>
+                        </tr>
+                    </thead>
+                    <tbody id="internalsTable">
+                        <tr><td colspan="2" style="padding: 18px; color: var(--muted);">Loading marks...</td></tr>
+                    </tbody>
+                </table>
+            </section>
+        </div>
+
+        <section class="card">
+            <div class="section-title">
+                <h2>Announcements</h2>
+            </div>
+            <ul id="messages" style="margin: 0; padding-left: 18px;"></ul>
+        </section>
+
+        <section class="card">
+            <div class="section-title">
+                <h2>Assignments</h2>
+            </div>
+            <ul id="assignments" class="announcement-list"></ul>
+        </section>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <!-- NOTIFICATION MODAL -->
+    <div id="notificationModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 30px; border-radius: 12px; max-width: 500px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); text-align: center; animation: slideIn 0.3s ease;">
+            <h2 style="margin: 0 0 15px 0; color: #2d3748;">📚 New Assignment Posted!</h2>
+            <p id="notificationText" style="margin: 0 0 20px 0; color: #4a5568; font-size: 16px;"></p>
+            <button onclick="closeNotification()" style="padding: 12px 30px; background: #3182ce; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: 500;">View Assignment</button>
+        </div>
+    </div>
+
+    <style>
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        #notificationModal {
+            animation: slideIn 0.3s ease;
+        }
+    </style>
+    <script>
+const API = "http://127.0.0.1:8000";
+let lastAssignmentCount = 0;
+let notificationCheckInterval;
+
+(function () {
+    const role = localStorage.getItem("user_role");
+    const email = localStorage.getItem("user_email");
+
+    if (role !== "student" || !email) {
+        showToast("Unauthorized access ❗ Please login as student", "error");
+        setTimeout(() => window.location.href = "/login", 1400);
+        return;
+    }
+
+    document.getElementById("userEmail").textContent = email;
+})();
+
+window.onload = () => {
+    loadData();
+    
+    // Initialize assignment count from localStorage
+    lastAssignmentCount = parseInt(localStorage.getItem("lastAssignmentCount") || "0");
+    
+    // Check for new assignments every 5 seconds
+    notificationCheckInterval = setInterval(checkForNewAssignments, 5000);
+};
+
+window.onbeforeunload = () => {
+    if (notificationCheckInterval) {
+        clearInterval(notificationCheckInterval);
+    }
+};
+
+function showToast(message, type = "success") {
+    const container = document.getElementById("toastContainer");
+    if (!container) return;
+
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    container.appendChild(toast);
+
+    setTimeout(() => toast.remove(), 3000);
+}
+
+function showNotificationModal(assignmentTitle, assignmentDesc) {
+    const modal = document.getElementById("notificationModal");
+    const notifText = document.getElementById("notificationText");
+    
+    notifText.innerHTML = `<strong>${assignmentTitle}</strong><br><br>${assignmentDesc}`;
+    modal.style.display = "flex";
+    
+    // Play notification sound (optional)
+    playNotificationSound();
+}
+
+function closeNotification() {
+    const modal = document.getElementById("notificationModal");
+    modal.style.display = "none";
+}
+
+function playNotificationSound() {
+    // Create a simple beep sound using Web Audio API
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.value = 800;
+        oscillator.type = "sine";
+        
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.5);
+    } catch (e) {
+        console.log("Notification sound not available");
+    }
+}
+
+async function checkForNewAssignments() {
+    const email = localStorage.getItem("user_email");
+    if (!email) return;
+
+    try {
+        const res = await fetch(`${API}/student-data?email=${encodeURIComponent(email)}`);
+        if (!res.ok) return;
+
+        const data = await res.json();
+        const currentAssignmentCount = data.assignments?.length || 0;
+
+        // Check if new assignment was added
+        if (currentAssignmentCount > lastAssignmentCount) {
+            const newAssignments = data.assignments.slice(0, currentAssignmentCount - lastAssignmentCount);
+            
+            newAssignments.forEach(assignment => {
+                showNotificationModal(assignment.title, `📋 ${assignment.description}<br><br>Due: ${assignment.due_date}`);
+            });
+            
+            lastAssignmentCount = currentAssignmentCount;
+            localStorage.setItem("lastAssignmentCount", currentAssignmentCount);
+        }
+    } catch (err) {
+        console.error("Error checking for new assignments:", err);
+    }
+}
+
+async function loadData() {
+    const email = localStorage.getItem("user_email");
+
+    if (!email) {
+        showToast("Please login first ❗", "error");
+        setTimeout(() => window.location.href = "/login", 1200);
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API}/student-data?email=${encodeURIComponent(email)}`);
+        if (!res.ok) {
+            throw new Error(`Server responded ${res.status}`);
+        }
+
+        const data = await res.json();
+        let totalSubjects = 0;
+        let totalPresent = 0;
+        let totalClasses = 0;
+        let aHTML = "";
+
+        if (!data.attendance || data.attendance.length === 0) {
+            aHTML += `<tr><td colspan="3" class="empty">No attendance data</td></tr>`;
+        } else {
+            data.attendance.forEach(a => {
+                const absent = a.total - a.present;
+                aHTML += `<tr>
+                    <td>${a.subject}</td>
+                    <td>${a.present}</td>
+                    <td>${absent}</td>
+                </tr>`;
+                totalSubjects += 1;
+                totalPresent += a.present;
+                totalClasses += a.total;
+            });
+        }
+
+        document.getElementById("attendanceTable").innerHTML = aHTML;
+        document.getElementById("subjectCount").textContent = totalSubjects || "0";
+        document.getElementById("attendanceRate").textContent = totalClasses ? `${((totalPresent / totalClasses) * 100).toFixed(1)}%` : "--%";
+
+        let iHTML = "";
+
+        if (!data.internals || data.internals.length === 0) {
+            iHTML += `<tr><td colspan="2" class="empty">No marks data</td></tr>`;
+        } else {
+            data.internals.forEach(i => {
+                iHTML += `<tr>
+                    <td>${i.subject}</td>
+                    <td>${i.marks}</td>
+                </tr>`;
+            });
+        }
+
+        document.getElementById("internalsTable").innerHTML = iHTML;
+
+        const messageCount = data.messages?.length || 0;
+        const assignmentCount = data.assignments?.length || 0;
+        document.getElementById("announcementCount").textContent = messageCount;
+        document.getElementById("assignmentsCount").textContent = assignmentCount;
+
+        // Update lastAssignmentCount on first load
+        if (lastAssignmentCount === 0) {
+            lastAssignmentCount = assignmentCount;
+            localStorage.setItem("lastAssignmentCount", assignmentCount);
+        }
+
+        let mHTML = "";
+        if (!data.messages || data.messages.length === 0) {
+            mHTML = "<li class='empty'>No announcements</li>";
+        } else {
+            data.messages.forEach(m => {
+                mHTML += `<li style="margin-bottom: 16px;"><strong>${m.title}</strong><p style="margin: 6px 0 0; color: var(--muted);">${m.message}</p></li>`;
+            });
+        }
+
+        document.getElementById("messages").innerHTML = mHTML;
+
+        let asHTML = "";
+        if (!data.assignments || data.assignments.length === 0) {
+            asHTML = "<li class='empty'>No assignments currently uploaded.</li>";
+        } else {
+            data.assignments.forEach(assign => {
+                asHTML += `<li class="announcement-item"><div class="announcement-header"><strong>${assign.title}</strong><p>Due: ${assign.due_date}</p></div><p style="margin: 0; color: var(--muted);">${assign.description}</p></li>`;
+            });
+        }
+
+        document.getElementById("assignments").innerHTML = asHTML;
+
+    } catch (err) {
+        console.error(err);
+        showToast("Error loading data ❌", "error");
+    }
+}
+
+function logout() {
+    localStorage.clear();
+    if (notificationCheckInterval) {
+        clearInterval(notificationCheckInterval);
+    }
+    window.location.href = "/login";
+}
+</script>
+</body>
+</html>

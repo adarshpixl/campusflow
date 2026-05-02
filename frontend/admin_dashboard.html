@@ -1,0 +1,193 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Flow - Admin</title>
+
+    <!-- FONT -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- STYLE -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body class="dashboard-page">
+
+<!-- ================= HEADER ================= -->
+<div class="topbar">
+    <div class="container header">
+
+        <div class="brand">
+            <div class="brand-icon">C</div>
+            <div>
+                <h1>Campus Flow</h1>
+                <p>Admin Dashboard</p>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <button class="secondary-btn" onclick="logout()">Logout</button>
+        </div>
+
+    </div>
+</div>
+
+<!-- ================= MAIN ================= -->
+<div class="container">
+    <div class="dashboard-main">
+
+        <main class="dashboard-grid">
+
+            <!-- ADD STUDENT -->
+            <section class="card">
+                <div class="section-title">
+                    <h2>Add Student</h2>
+                    <span class="badge">New entry</span>
+                </div>
+
+                <div class="input-group">
+                    <input id="s_name" placeholder="Full name">
+                    <input id="s_email" type="email" placeholder="Email">
+                    <input id="s_dept" placeholder="Department">
+                </div>
+
+                <button class="primary-btn" onclick="addStudent()">Add Student</button>
+            </section>
+
+            <!-- VIEW STUDENTS -->
+            <section class="card table-card">
+                <div class="section-title">
+                    <h2>View Students</h2>
+                    <button class="secondary-btn" onclick="loadStudents()">Refresh</button>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Department</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="studentsTable">
+                        <tr>
+                            <td colspan="4" class="empty">Click refresh to load students</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- ADD ASSIGNMENT -->
+            <section class="card">
+                <div class="section-title">
+                    <h2>Add Assignment</h2>
+                </div>
+
+                <div class="input-group">
+                    <input id="a_title" placeholder="Title">
+                    <input id="a_desc" placeholder="Description">
+                    <input id="a_date" placeholder="YYYY-MM-DD">
+                </div>
+
+                <button class="primary-btn" onclick="addAssignment()">Create Assignment</button>
+            </section>
+
+            <!-- ASSIGNMENT LIST -->
+            <section class="card">
+                <div class="section-title">
+                    <h2>Assignments</h2>
+                </div>
+
+                <ul id="assignmentList" class="announcement-list">
+                    <li class="empty">Loading assignments...</li>
+                </ul>
+            </section>
+
+            <!-- ATTENDANCE -->
+            <section class="card">
+                <div class="section-title">
+                    <h2>Mark Attendance</h2>
+                </div>
+
+                <div class="input-group">
+                    <input id="att_email" placeholder="Student Email">
+                    <input id="att_sub" placeholder="Subject">
+                    <input id="att_status" placeholder="present / absent">
+                </div>
+
+                <button class="secondary-btn" onclick="markAttendance()">Submit</button>
+            </section>
+
+            <!-- INTERNAL MARKS -->
+            <section class="card">
+                <div class="section-title">
+                    <h2>Add Internal Marks</h2>
+                </div>
+
+                <div class="input-group">
+                    <input id="int_email" placeholder="Student Email">
+                    <input id="int_sub" placeholder="Subject">
+                    <input id="int_marks" placeholder="Marks (0-25)">
+                </div>
+
+                <button class="secondary-btn" onclick="addInternal()">Submit</button>
+            </section>
+
+            <!-- ANNOUNCEMENTS -->
+            <section class="card">
+                <div class="section-title">
+                    <h2>Announcements</h2>
+                </div>
+
+                <div class="input-group">
+                    <input id="msg_title" placeholder="Title">
+                    <input id="msg_body" placeholder="Message">
+                </div>
+
+                <button class="primary-btn" onclick="sendMessage()">Send</button>
+
+                <div style="margin-top:20px;">
+                    <h3>Existing</h3>
+                    <ul id="announcementList" class="announcement-list">
+                        <li class="empty">Loading announcements...</li>
+                    </ul>
+                </div>
+            </section>
+
+        </main>
+
+    </div>
+</div>
+
+<!-- ================= STUDENT DETAIL PANEL ================= -->
+<div id="studentDetailPanel" class="detail-panel hidden">
+    <div class="detail-panel-card card">
+
+        <button onclick="closeStudentDetails()">Close</button>
+
+        <div id="studentDetailContent"></div>
+
+    </div>
+</div>
+
+<!-- ================= NOTIFICATION MODAL ================= -->
+<div id="adminNotificationModal" class="admin-notification-modal">
+    <div class="admin-notification-card">
+        <h2 id="adminNotificationTitle">Message sent successfully</h2>
+        <p id="adminNotificationBody">Notification emails have been sent.</p>
+        <p id="adminNotificationMeta"></p>
+        <button onclick="closeAdminNotification()">Got it</button>
+    </div>
+</div>
+
+<!-- ================= TOAST ================= -->
+<div id="toastContainer"></div>
+
+<!-- ================= SCRIPT ================= -->
+<script src="/static/js/admin.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Flow - Register</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body class="auth-page">
+    <div class="topbar">
+        <div class="container header">
+            <div class="brand">
+                <div class="brand-icon">C</div>
+                <div>
+                    <h1>Campus Flow</h1>
+                    <p>Student Management System</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="auth-layout">
+        <div class="auth-card card">
+            <h2>Create student account</h2>
+            <p>Register a new student to manage attendance and marks.</p>
+
+            <div class="input-group">
+                <input id="name" placeholder="Full Name">
+                <input id="email" type="email" placeholder="Email">
+                <input id="password" type="password" placeholder="Password">
+            </div>
+
+            <div class="auth-actions">
+                <button class="primary-btn" onclick="register()">Register</button>
+                <p class="form-link">Already registered? <a href="/login">Sign in</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+    <script src="/static/js/register.js"></script>
+</body>
+</html>
