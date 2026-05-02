@@ -38,7 +38,7 @@ def send_bulk_emails(emails, subject, body):
 def assignment_email_body(title: str, description: str, due_date: str) -> str:
     return f"""Hello Student,
 
-A new assignment has been posted in Campus Flow.
+A new assignment has been posted in Campus Management.
 
 Assignment: {title}
 Due date: {due_date}
@@ -49,13 +49,13 @@ Details:
 Please review the assignment from your student dashboard and plan your submission before the due date.
 
 Regards,
-Campus Flow Admin Team"""
+Campus Management Admin Team"""
 
 
 def announcement_email_body(title: str, message: str) -> str:
     return f"""Hello Student,
 
-A new announcement has been shared in Campus Flow.
+A new announcement has been shared in Campus Management.
 
 Title: {title}
 
@@ -65,13 +65,13 @@ Message:
 Please check your student dashboard for the latest updates.
 
 Regards,
-Campus Flow Admin Team"""
+Campus Management Admin Team"""
 
 
 def internal_marks_email_body(subject: str, marks: int) -> str:
     return f"""Hello Student,
 
-Your internal marks have been updated in Campus Flow.
+Your internal marks have been updated in Campus Management.
 
 Subject: {subject}
 Marks scored: {marks}/25
@@ -79,7 +79,7 @@ Marks scored: {marks}/25
 Please log in to your student dashboard to review your academic record. If you think the marks need correction, contact your faculty or department admin.
 
 Regards,
-Campus Flow Admin Team"""
+Campus Management Admin Team"""
 
 
 def attendance_email_body(subject: str, status: str) -> str:
@@ -88,7 +88,7 @@ def attendance_email_body(subject: str, status: str) -> str:
 
     return f"""Hello Student,
 
-Your attendance has been recorded in Campus Flow.
+Your attendance has been recorded in Campus Management.
 
 Subject: {subject}
 Status: {status_text}
@@ -96,7 +96,7 @@ Status: {status_text}
 {note}
 
 Regards,
-Campus Flow Admin Team"""
+Campus Management Admin Team"""
 
 
 # =========================

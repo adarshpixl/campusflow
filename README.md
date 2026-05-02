@@ -1,7 +1,7 @@
-# 🎓 Campus Flow – DBMS Mini Project
+# 🎓 Campus Management – DBMS Mini Project
 
 ## 📌 Project Overview
-Campus Flow is a full-stack web application designed to manage student academic data such as attendance, internal marks, assignments, and announcements.
+Campus Management is a full-stack web application designed to manage student academic data such as attendance, internal marks, assignments, and announcements.
 
 It provides:
 - 👨‍💼 Admin Dashboard (manage everything)
